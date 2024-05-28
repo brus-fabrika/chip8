@@ -1,0 +1,5 @@
+bin
+.vscode
+c.out
+go.mod
+go.sum
