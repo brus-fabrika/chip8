@@ -64,8 +64,8 @@ func TestInit(t *testing.T) {
 	assert.Equal(t, [16]bool{}, ch.Keyboard)
 	// make sure video buffer state reset
 	assert.Equal(t, [chip8.DISPLAY_WIDTH * chip8.DISPLAY_HEIGHT]bool{}, ch.DisplayBuffer)
-	// make sure memory state reset
-	assert.Equal(t, [chip8.MEMORY_SIZE]uint8{}, ch.Memory)
+	// make sure memory state reset, but skiping first 0x0200 bytes for now
+	assert.Equal(t, make([]uint8, chip8.MEMORY_SIZE)[chip8.MEMORY_USER:], ch.Memory[chip8.MEMORY_USER:])
 
 }
 

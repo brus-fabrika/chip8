@@ -3,3 +3,5 @@ bin
 c.out
 go.mod
 go.sum
+*.dll
+

@@ -11,12 +11,32 @@ const (
 	DISPLAY_WIDTH          = 64
 	DISPLAY_HEIGHT         = 32
 	MEMORY_SIZE     uint16 = 0x1000
+	MEMORY_FONT     uint16 = 0x01B0
 	MEMORY_USER     uint16 = 0x0200
 	MEMORY_STACK    uint16 = MEMORY_SIZE - 0x0200 + 0x00a0
 	MEMORY_INT_AREA uint16 = MEMORY_STACK + 0x0030
 	MEMORY_REG_AREA uint16 = MEMORY_INT_AREA + 0x0020
 	MEMORY_DISPLAY  uint16 = MEMORY_REG_AREA + 0x0010
 )
+
+var font_data = []uint8{
+	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+	0x20, 0x60, 0x20, 0x20, 0x70, // 1
+	0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+	0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+	0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+	0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+	0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+	0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+	0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+	0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+	0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+	0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+	0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+	0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+	0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+	0xF0, 0x80, 0xF0, 0x80, 0x80, // F
+}
 
 type Register int
 
@@ -317,6 +337,21 @@ func (chip *Chip8) CopyMemToReg(r Register) {
 	chip.Reg.PC += 2
 }
 
+func (chip *Chip8) SetCharReg(r Register) {
+	val := chip.getRegister(r) & 0x000F
+	chip.Reg.I = MEMORY_FONT + val
+
+	chip.Reg.PC += 2
+}
+
+func (chip *Chip8) GetKeyReg(r Register) {
+	chip.Reg.PC += 2
+
+	if !chip.Keyboard[chip.getRegister(r)] {
+		chip.Reg.PC -= 2
+	}
+}
+
 func (chip *Chip8) Init() {
 	chip.ClearScreen()
 
@@ -330,10 +365,13 @@ func (chip *Chip8) Init() {
 		chip.Keyboard[i] = false
 	}
 
-	// clear the registers state
+	// clear registers state
 	for i := 0; i < 16; i++ {
 		chip.Reg.V[i] = 0
 	}
+
+	chip.LoadFontFromData(font_data)
+
 	chip.Reg.PC = MEMORY_USER           // set programm counter at the beginning of user prog area
 	chip.Reg.SP = MEMORY_STACK + 0x002f // set stack pointer at the last byte of stack area
 	chip.Reg.I = 0
@@ -490,7 +528,10 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 			// tmp!!!
 			chip.Reg.PC -= 2
 		case 0x29:
-			cmdStr = "NVO"
+			cmdStr = fmt.Sprintf("STC V%X", cmd&0x0f00>>8)
+			chip.SetCharReg(Register(cmd & 0x0f00 >> 8))
+			// tmp!!!
+			chip.Reg.PC -= 2
 		case 0x33:
 			cmdStr = fmt.Sprintf("BCD V%X", cmd&0x0f00>>8)
 			chip.BcdReg(Register(cmd & 0x0f00 >> 8))
@@ -544,12 +585,20 @@ func (chip *Chip8) LoadRomFromFile(fileName string) (uint16, error) {
 }
 
 func (chip *Chip8) LoadRomFromData(data []uint8) (uint16, error) {
-	for k, v := range data {
-		chip.Memory[int(MEMORY_USER)+k] = v
+	for i, v := range data {
+		chip.Memory[int(MEMORY_USER)+i] = v
 	}
 	chip.RomSize = uint16(len(data))
 
 	return chip.RomSize, nil
+}
+
+func (chip *Chip8) LoadFontFromData(data []uint8) (uint16, error) {
+	for i, v := range data {
+		chip.Memory[MEMORY_FONT+uint16(i)] = v
+	}
+
+	return uint16(len(data)), nil
 }
 
 /*
