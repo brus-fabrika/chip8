@@ -421,13 +421,9 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 	case 0x6000:
 		cmdStr = fmt.Sprintf("MOV V%x, %02x", cmd&0x0f00>>8, cmd&0x00ff)
 		chip.MovRegVal(Register(cmd&0x0f00>>8), cmd&0x00ff)
-		// TEMPORARY!!!
-		chip.Reg.PC -= 2
 	case 0x7000:
 		cmdStr = fmt.Sprintf("ADD V%x, %02x", cmd&0x0f00>>8, cmd&0x00ff)
 		chip.AddRegVal(Register(cmd&0x0f00>>8), uint8(cmd&0x00ff))
-		// TEMP!
-		chip.Reg.PC -= 2
 	case 0x8000:
 		// ALU command
 		opCode := cmd & 0x000f
@@ -465,30 +461,23 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 		default:
 			cmdStr = "NVO"
 		}
-		//TEMP!
-		chip.Reg.PC -= 2
 	case 0x9000:
 		cmdStr = fmt.Sprintf("SNE V%x, V%x", cmd&0x0f00, cmd&0x00f0)
 		chip.SkipNotEqualReg(Register(cmd&0x0f00>>8), Register(cmd&0x00f0>>4))
 	case 0xa000:
 		cmdStr = fmt.Sprintf("MOV I, 0x%04x", cmd&0x0fff)
 		chip.MovRegVal(RegI, cmd&0x0fff)
-		// TEMPORARY!!!
-		chip.Reg.PC -= 2
 	case 0xb000:
 		cmdStr = fmt.Sprintf("JMPV 0x%04x", cmd&0x0fff)
 		chip.JumpV(cmd & 0x0fff)
 	case 0xc000:
 		cmdStr = fmt.Sprintf("RND V%X, %2X", cmd&0x0f00>>8, cmd&0x00ff)
 		chip.MovRegRnd(Register(cmd&0x0f00>>8), uint8(cmd&0x00ff))
-		// TEMP!
-		chip.Reg.PC -= 2
 	case 0xd000:
 		cmdStr = fmt.Sprintf("DRAW %x, V%X, V%X", cmd&0x000f, cmd&0x0f00>>8, cmd&0x00f0>>4)
 		xr := Register(cmd & 0x0f00 >> 8)
 		yr := Register(cmd & 0x00f0 >> 4)
 		chip.DisplayAt(xr, yr, int(cmd&0x000f))
-		chip.Reg.PC -= 2 // TEMP!!!!11
 	case 0xe000:
 		xr := Register(cmd & 0x0f00 >> 8)
 
@@ -507,46 +496,30 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 		case 0x07:
 			cmdStr = fmt.Sprintf("MOV V%X, T0", cmd&0x0f00>>8)
 			chip.MovRegReg(Register(cmd&0x0f00>>8), RegT0)
-			// tmp!!!
-			chip.Reg.PC -= 2
 		case 0x0A:
 			// TODO: wait for key pressed
 			cmdStr = "NVO"
 		case 0x15:
 			cmdStr = fmt.Sprintf("MOV T0, V%X", cmd&0x0f00>>8)
 			chip.MovRegReg(RegT0, Register(cmd&0x0f00>>8))
-			// tmp!!!
-			chip.Reg.PC -= 2
 		case 0x18:
 			cmdStr = fmt.Sprintf("MOV T1, V%X", cmd&0x0f00>>8)
 			chip.MovRegReg(RegT1, Register(cmd&0x0f00>>8))
-			// tmp!!!
-			chip.Reg.PC -= 2
 		case 0x1E:
 			cmdStr = fmt.Sprintf("ADD I, V%X", cmd&0x0f00>>8)
 			chip.AddRegVal(RegI, uint8(chip.getRegister(Register(cmd&0x0f00>>8))))
-			// tmp!!!
-			chip.Reg.PC -= 2
 		case 0x29:
 			cmdStr = fmt.Sprintf("STC V%X", cmd&0x0f00>>8)
 			chip.SetCharReg(Register(cmd & 0x0f00 >> 8))
-			// tmp!!!
-			chip.Reg.PC -= 2
 		case 0x33:
 			cmdStr = fmt.Sprintf("BCD V%X", cmd&0x0f00>>8)
 			chip.BcdReg(Register(cmd & 0x0f00 >> 8))
-			// tmp!!
-			chip.Reg.PC -= 2
 		case 0x55:
 			cmdStr = fmt.Sprintf("CAM V%X", cmd&0x0f00>>8)
 			chip.CopyRegToMem(Register(cmd & 0x0f00 >> 8))
-			// tmp!!
-			chip.Reg.PC -= 2
 		case 0x65:
 			cmdStr = fmt.Sprintf("CAR V%X", cmd&0x0f00>>8)
 			chip.CopyMemToReg(Register(cmd & 0x0f00 >> 8))
-			// tmp!!
-			chip.Reg.PC -= 2
 		default:
 			cmdStr = "NVO"
 		}
@@ -555,11 +528,6 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 	}
 
 	fmt.Printf("\t%04x:\t%04x\t;%s\n", chip.Reg.PC, cmd, cmdStr)
-
-	//chip.RegistryDump()
-
-	// increase program counter
-	chip.Reg.PC += 2
 }
 
 func (chip *Chip8) LoadRomFromFile(fileName string) (uint16, error) {
