@@ -120,6 +120,7 @@ func (chip *Chip8) ClearScreen() {
 	for i := 0; i < DISPLAY_WIDTH*DISPLAY_HEIGHT; i++ {
 		chip.DisplayBuffer[i] = false
 	}
+	chip.Reg.PC += 2
 }
 
 func (chip *Chip8) DisplayAt(xr, yr Register, h int) {

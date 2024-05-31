@@ -69,6 +69,6 @@ func main() {
 
 		e.Renderer.Present()
 
-		sdl.Delay(1000)
+		sdl.Delay(500)
 	}
 }
