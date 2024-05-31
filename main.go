@@ -15,7 +15,10 @@ const (
 	USE_FIXED_FRAMERATE = false
 )
 
-var displayTest = []uint8{0xa2, 0x0a, 0x61, 0x00, 0x62, 0x0a, 0xd1, 0x25, 0x12, 0x08, 0xf0, 0x90, 0xf0, 0x90, 0xf0, 0x00}
+//var displayTest = []uint8{0xa2, 0x0a, 0x61, 0x00, 0x62, 0x0a, 0xd1, 0x25, 0x12, 0x08, 0xf0, 0x90, 0xf0, 0x90, 0xf0, 0x00}
+
+// var romFile = ".\\bin\\4-flags.ch8"
+var romFile = ".\\bin\\3-corax+.ch8"
 
 func main() {
 	e := Engine{}
@@ -25,6 +28,8 @@ func main() {
 		panic(err)
 	}
 	defer e.Destroy()
+
+	e.Window.SetTitle(romFile)
 
 	println("Hello from CHIP8")
 	println("Memory layout:")
@@ -36,9 +41,9 @@ func main() {
 	chip := chip8.Chip8{}
 	chip.Init()
 	//chip.LoadRomFromFile(".\\bin\\IbmLogo.ch8")
-	chip.LoadRomFromFile(".\\bin\\3-corax+.ch8")
+	chip.LoadRomFromFile(romFile)
 	//chip.LoadRomFromData(displayTest)
-	chip.MemoryDump(0x0200, 0x0300)
+	chip.MemoryDump(0x0200, 0x0600)
 	//chip.Execute()
 	//chip.DisplayDump()
 	paused := false
@@ -57,10 +62,10 @@ func main() {
 						running = false
 					case sdl.K_SPACE:
 						paused = !paused
-						if !paused {
-							//frameCounter = 0
-							//currentFrameCounter = 0
-						}
+						//if !paused {
+						//frameCounter = 0
+						//currentFrameCounter = 0
+						//}
 					}
 				}
 				if event.Type == sdl.KEYUP {
@@ -92,6 +97,6 @@ func main() {
 
 		e.Renderer.Present()
 
-		sdl.Delay(500)
+		sdl.Delay(100)
 	}
 }

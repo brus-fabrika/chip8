@@ -2,9 +2,15 @@
 Based on 3-corax+ test:
 - [x] Program debug prints cmd address increased (next one, not current)
 - [x] incorrect char positioning (not sure yet why) - set/get Register were missing V7 and V8 (:
-- [ ] 8xx7 and 8xxE ops give errors on test scren
+- [x] 8xxE op gives errors on test scren - wrong opcode execution in ProcessCmd
+- [ ] 8xx7 op gives errors on test scren
 - [ ] v8 test gives error - something with 8bits in V registers
-
+Based on 4-flags test:
+- [x] CF error with 0x8xx4
+- [ ] CF error with 0x8xx5
+- [ ] CF error with 0x8xx6
+- [ ] CF error with 0x8xx7
+- [ ] CF error with 0x8xxE
 
 ## Chip8 memory layout
 4096 bytes total (0x0000 - 0x0fff)

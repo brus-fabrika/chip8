@@ -181,16 +181,17 @@ func (chip *Chip8) AddRegVal(r Register, val uint8) {
 }
 
 func (chip *Chip8) AddRegReg(r1, r2 Register) {
-	// carry flag modified if needed
 	result := chip.getRegister(r1) + chip.getRegister(r2)
 
+	chip.setRegister(r1, result)
+
+	// carry flag modified if needed
 	if result > 0x00ff {
 		chip.setRegister(RegVF, 0x01)
 	} else {
 		chip.setRegister(RegVF, 0x00)
 	}
 
-	chip.setRegister(r1, result)
 	chip.Reg.PC += 2
 }
 
@@ -460,11 +461,11 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 			cmdStr = fmt.Sprintf("SHR V%x, V%x", xr, yr)
 			chip.ShiftR(xr)
 		case 0x07:
-			cmdStr = fmt.Sprintf("SHL V%x, V%x", xr, yr)
-			chip.ShiftL(xr)
-		case 0x0E:
 			cmdStr = fmt.Sprintf("SUB V%x, V%x", yr, xr)
 			chip.SubRegReg(yr, xr)
+		case 0x0E:
+			cmdStr = fmt.Sprintf("SHL V%x, V%x", xr, yr)
+			chip.ShiftL(xr)
 		default:
 			cmdStr = "NVO"
 		}

@@ -360,6 +360,8 @@ func TestAddRegReg(t *testing.T) {
 		{Name: "V1V2OF", Reg1: chip8.RegV1, RegVal1: uint16(0x0c), Reg2: chip8.RegV2, RegVal2: uint16(0xF9), RegExpected: uint8(0x05), ExpectedOF: uint8(1)},
 		{Name: "V1V2TwoZero", Reg1: chip8.RegV1, RegVal1: uint16(0x00), Reg2: chip8.RegV2, RegVal2: uint16(0x00), RegExpected: uint8(0x0), ExpectedOF: uint8(0)},
 		{Name: "V1V2OFtoZero", Reg1: chip8.RegV1, RegVal1: uint16(0x85), Reg2: chip8.RegV2, RegVal2: uint16(0x7b), RegExpected: uint8(0), ExpectedOF: uint8(1)},
+		{Name: "VFInputNoCarry", Reg1: chip8.RegVF, RegVal1: uint16(0x85), Reg2: chip8.RegV2, RegVal2: uint16(0x5), RegExpected: uint8(0x00), ExpectedOF: uint8(0)},
+		{Name: "VFInputCarry", Reg1: chip8.RegVF, RegVal1: uint16(0x85), Reg2: chip8.RegV2, RegVal2: uint16(0x7d), RegExpected: uint8(0x01), ExpectedOF: uint8(1)},
 	}
 
 	ch := chip8.Chip8{}
