@@ -80,9 +80,14 @@ func TestMoveRegVal(t *testing.T) {
 	ch.MovRegVal(chip8.RegI, expected16)
 	ch.MovRegVal(chip8.RegT0, expected16)
 
+	cmd := 0x6832
+	ch.MovRegVal(chip8.Register(cmd&0x0f00>>8), uint16(cmd&0x00ff))
+
+	assert.Equal(t, uint8(0x32), ch.Reg.V[8])
+
 	assert.Equal(t, expected16, ch.Reg.I)
 	assert.Equal(t, expected08, ch.Reg.T0)
-	assert.Equal(t, uint16(0x0204), ch.Reg.PC)
+	assert.Equal(t, uint16(0x0206), ch.Reg.PC)
 }
 
 func TestMoveRegReg(t *testing.T) {

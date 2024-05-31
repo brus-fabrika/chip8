@@ -92,8 +92,10 @@ func (chip *Chip8) getRegister(r Register) uint16 {
 		return uint16(chip.Reg.T0)
 	case RegT1:
 		return uint16(chip.Reg.T1)
-	case RegV0, RegV1, RegV2, RegV3, RegV4, RegV5, RegV6,
-		RegV9, RegVA, RegVB, RegVC, RegVD, RegVE, RegVF:
+	case RegV0, RegV1, RegV2, RegV3,
+		RegV4, RegV5, RegV6, RegV7,
+		RegV8, RegV9, RegVA, RegVB,
+		RegVC, RegVD, RegVE, RegVF:
 		return uint16(chip.Reg.V[r])
 	}
 
@@ -110,8 +112,10 @@ func (chip *Chip8) setRegister(r Register, val uint16) {
 		chip.Reg.T0 = uint8(val)
 	case RegT1:
 		chip.Reg.T1 = uint8(val)
-	case RegV0, RegV1, RegV2, RegV3, RegV4, RegV5, RegV6,
-		RegV9, RegVA, RegVB, RegVC, RegVD, RegVE, RegVF:
+	case RegV0, RegV1, RegV2, RegV3,
+		RegV4, RegV5, RegV6, RegV7,
+		RegV8, RegV9, RegVA, RegVB,
+		RegVC, RegVD, RegVE, RegVF:
 		chip.Reg.V[r] = uint8(val)
 	}
 }
@@ -392,6 +396,8 @@ func (chip *Chip8) Execute() {
 func (chip *Chip8) ProcessCmd(cmd uint16) {
 	var cmdStr string
 
+	// for debug print purpose - save the current PC
+	curPC := chip.Reg.PC
 	// just debug print for now
 	switch cmd & 0xf000 {
 	case 0x0000:
@@ -405,22 +411,22 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 			cmdStr = fmt.Sprintf("MCALL 0x%04x", cmd&0x0fff)
 		}
 	case 0x1000:
-		cmdStr = fmt.Sprintf("JMP 0x%04x", cmd&0x0fff)
+		cmdStr = fmt.Sprintf("JMP 0x%04X", cmd&0x0fff)
 		chip.Jump(cmd & 0x0fff)
 	case 0x2000:
 		cmdStr = fmt.Sprintf("CALL 0x%04x", cmd&0x0fff)
 		chip.Call(cmd & 0x0fff)
 	case 0x3000:
-		cmdStr = fmt.Sprintf("SE  V%x, %02x", cmd&0x0f00>>8, cmd&0x00ff)
+		cmdStr = fmt.Sprintf("SE  V%X, %02x", cmd&0x0f00>>8, cmd&0x00ff)
 		chip.SkipEqualVal(Register(cmd&0x0f00>>8), uint8(cmd&0x00ff))
 	case 0x4000:
-		cmdStr = fmt.Sprintf("SNE V%x, %02x", cmd&0x0f00>>8, cmd&0x00ff)
+		cmdStr = fmt.Sprintf("SNE V%X, %02x", cmd&0x0f00>>8, cmd&0x00ff)
 		chip.SkipNotEqualVal(Register(cmd&0x0f00>>8), uint8(cmd&0x00ff))
 	case 0x5000:
-		cmdStr = fmt.Sprintf("SE  V%x, V%x", cmd&0x0f00>>8, cmd&0x00f0>>4)
+		cmdStr = fmt.Sprintf("SE  V%X, V%x", cmd&0x0f00>>8, cmd&0x00f0>>4)
 		chip.SkipEqualReg(Register(cmd&0x0f00>>8), Register(cmd&0x00f0>>4))
 	case 0x6000:
-		cmdStr = fmt.Sprintf("MOV V%x, %02x", cmd&0x0f00>>8, cmd&0x00ff)
+		cmdStr = fmt.Sprintf("MOV V%X, %02x", cmd&0x0f00>>8, cmd&0x00ff)
 		chip.MovRegVal(Register(cmd&0x0f00>>8), cmd&0x00ff)
 	case 0x7000:
 		cmdStr = fmt.Sprintf("ADD V%x, %02x", cmd&0x0f00>>8, cmd&0x00ff)
@@ -475,7 +481,7 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 		cmdStr = fmt.Sprintf("RND V%X, %2X", cmd&0x0f00>>8, cmd&0x00ff)
 		chip.MovRegRnd(Register(cmd&0x0f00>>8), uint8(cmd&0x00ff))
 	case 0xd000:
-		cmdStr = fmt.Sprintf("DRAW %x, V%X, V%X", cmd&0x000f, cmd&0x0f00>>8, cmd&0x00f0>>4)
+		cmdStr = fmt.Sprintf("DRAW %x, V%X, V%X ; (%d, %d)", cmd&0x000f, cmd&0x0f00>>8, cmd&0x00f0>>4, chip.getRegister(Register(cmd&0x0f00>>8)), chip.getRegister(Register(cmd&0x00f0>>4)))
 		xr := Register(cmd & 0x0f00 >> 8)
 		yr := Register(cmd & 0x00f0 >> 4)
 		chip.DisplayAt(xr, yr, int(cmd&0x000f))
@@ -528,7 +534,7 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 		cmdStr = "NVO"
 	}
 
-	fmt.Printf("\t%04x:\t%04x\t;%s\n", chip.Reg.PC, cmd, cmdStr)
+	fmt.Printf("\t%04x:\t%04x\t;%s\n", curPC, cmd, cmdStr)
 }
 
 func (chip *Chip8) LoadRomFromFile(fileName string) (uint16, error) {

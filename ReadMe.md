@@ -1,3 +1,11 @@
+## Current bugs
+Based on 3-corax+ test:
+- [x] Program debug prints cmd address increased (next one, not current)
+- [x] incorrect char positioning (not sure yet why) - set/get Register were missing V7 and V8 (:
+- [ ] 8xx7 and 8xxE ops give errors on test scren
+- [ ] v8 test gives error - something with 8bits in V registers
+
+
 ## Chip8 memory layout
 4096 bytes total (0x0000 - 0x0fff)
 
@@ -16,7 +24,7 @@
 |------|---------|------|--------------|----------------------------|-------------|
 | [ ]  | [ ]/[ ] | 0MMM | MCALL        |                            | Machine (OS) subroutine call |
 | [x]  | [ ]/[ ] | 00E0 | CLS          | ClearScreen()              | Clear screen |
-| [x]  | [ ]/[ ] | DXYN | DRAW N,VX,VY |                            | Draw byte pattern at pos VX,VY |
+| [x]  | [ ]/[ ] | DXYN | DRAW N,VX,VY | DisplayAt(VX, VY, N)       | Draw byte pattern at pos VX,VY |
 | [x]  | [x]/[ ] | 1MMM | JMP @0MMM    | Jump(MMM)                  | Unconditional jump to address |
 | [x]  | [x]/[ ] | BMMM | JMPV @0MMM   | JumpV(MMM)                 | Unconditional jump to (V0 + address)|
 | [x]  | [x]/[ ] | 2MMM | CALL @0MMM   | Call(MMM)                  | Subroutine call            |

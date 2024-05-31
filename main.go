@@ -35,20 +35,43 @@ func main() {
 	fmt.Printf("\tUser memory start: 0x%x - 0x%0x\n", chip8.MEMORY_DISPLAY, chip8.MEMORY_SIZE-1)
 	chip := chip8.Chip8{}
 	chip.Init()
-	chip.LoadRomFromFile(".\\bin\\IbmLogo.ch8")
+	//chip.LoadRomFromFile(".\\bin\\IbmLogo.ch8")
+	chip.LoadRomFromFile(".\\bin\\3-corax+.ch8")
 	//chip.LoadRomFromData(displayTest)
 	chip.MemoryDump(0x0200, 0x0300)
 	//chip.Execute()
 	//chip.DisplayDump()
-
+	paused := false
 	running := true
 	for running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			switch event.(type) {
+			switch event := event.(type) {
 			case *sdl.QuitEvent:
 				println("Quit")
 				running = false
+			case *sdl.KeyboardEvent:
+				if event.Type == sdl.KEYDOWN {
+					switch event.Keysym.Sym {
+					case sdl.K_ESCAPE:
+						println("Quit")
+						running = false
+					case sdl.K_SPACE:
+						paused = !paused
+						if !paused {
+							//frameCounter = 0
+							//currentFrameCounter = 0
+						}
+					}
+				}
+				if event.Type == sdl.KEYUP {
+					switch event.Keysym.Sym {
+					}
+				}
 			}
+		}
+
+		if paused {
+			continue
 		}
 
 		cmd := uint16(chip.Memory[int(chip.Reg.PC)])<<8 + uint16(chip.Memory[int(chip.Reg.PC+1)])
