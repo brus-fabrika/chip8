@@ -198,15 +198,17 @@ func (chip *Chip8) AddRegReg(r1, r2 Register) {
 func (chip *Chip8) SubRegReg(r1, r2 Register) {
 	// carry flag modified if needed
 	result := chip.getRegister(r1) - chip.getRegister(r2)
+	cf := chip.getRegister(r1) >= chip.getRegister(r2)
 
-	if chip.getRegister(r1) >= chip.getRegister(r2) {
+	chip.setRegister(r1, result)
+
+	if cf {
 		// carry flag is set if there was NO underflow
 		chip.setRegister(RegVF, 0x01)
 	} else {
 		chip.setRegister(RegVF, 0x00)
 	}
 
-	chip.setRegister(r1, result)
 	chip.Reg.PC += 2
 }
 
@@ -229,19 +231,23 @@ func (chip *Chip8) And(r1, r2 Register) {
 }
 
 func (chip *Chip8) ShiftR(r Register) {
-	chip.Reg.V[0x0F] = uint8(chip.getRegister(r) & 0x01)
+	cf := uint8(chip.getRegister(r) & 0x01)
 
 	result := chip.getRegister(r) >> 1
 	chip.setRegister(r, result)
+
+	chip.Reg.V[0x0F] = cf
 
 	chip.Reg.PC += 2
 }
 
 func (chip *Chip8) ShiftL(r Register) {
-	chip.Reg.V[0x0F] = uint8(chip.getRegister(r) & 0x80 >> 7)
+	cf := uint8(chip.getRegister(r) & 0x80 >> 7)
 
 	result := chip.getRegister(r) << 1
 	chip.setRegister(r, result)
+
+	chip.Reg.V[0x0F] = cf
 
 	chip.Reg.PC += 2
 }

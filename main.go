@@ -17,8 +17,9 @@ const (
 
 //var displayTest = []uint8{0xa2, 0x0a, 0x61, 0x00, 0x62, 0x0a, 0xd1, 0x25, 0x12, 0x08, 0xf0, 0x90, 0xf0, 0x90, 0xf0, 0x00}
 
-// var romFile = ".\\bin\\4-flags.ch8"
-var romFile = ".\\bin\\3-corax+.ch8"
+var romFile = ".\\bin\\4-flags.ch8"
+
+//var romFile = ".\\bin\\3-corax+.ch8"
 
 func main() {
 	e := Engine{}

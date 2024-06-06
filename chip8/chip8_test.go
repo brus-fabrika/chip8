@@ -399,6 +399,8 @@ func TestSubRegReg(t *testing.T) {
 		{Name: "V1V2OF", Reg1: chip8.RegV1, RegVal1: uint16(0x0c), Reg2: chip8.RegV2, RegVal2: uint16(0xF9), RegExpected: uint8(0x13), ExpectedOF: uint8(0)},
 		{Name: "V1V2TwoZero", Reg1: chip8.RegV1, RegVal1: uint16(0x00), Reg2: chip8.RegV2, RegVal2: uint16(0x00), RegExpected: uint8(0x0), ExpectedOF: uint8(1)},
 		{Name: "V1V2SubtoZero", Reg1: chip8.RegV1, RegVal1: uint16(0x85), Reg2: chip8.RegV2, RegVal2: uint16(0x85), RegExpected: uint8(0), ExpectedOF: uint8(1)},
+		{Name: "VFCF", Reg1: chip8.RegVF, RegVal1: uint16(0x3c), Reg2: chip8.RegV2, RegVal2: uint16(0x19), RegExpected: uint8(0x01), ExpectedOF: uint8(1)},
+		{Name: "VFNoCF", Reg1: chip8.RegVF, RegVal1: uint16(0x0c), Reg2: chip8.RegV2, RegVal2: uint16(0xF9), RegExpected: uint8(0x0), ExpectedOF: uint8(0)},
 	}
 
 	ch := chip8.Chip8{}
@@ -499,6 +501,8 @@ func TestShiftR(t *testing.T) {
 		{Name: "V1_1", Reg: chip8.RegV1, RegVal: uint16(0b01010101), RegExpected: uint8(0b00101010), ExpectedOF: uint8(1)},
 		{Name: "V1_2", Reg: chip8.RegV1, RegVal: uint16(0b00000001), RegExpected: uint8(0x0), ExpectedOF: uint8(1)},
 		{Name: "V1_3", Reg: chip8.RegV1, RegVal: uint16(0xF0), RegExpected: uint8(0x78), ExpectedOF: uint8(0)},
+		{Name: "VF_NoOF", Reg: chip8.RegVF, RegVal: uint16(0xF0), RegExpected: uint8(0x00), ExpectedOF: uint8(0)},
+		{Name: "VF_OF", Reg: chip8.RegVF, RegVal: uint16(0xF1), RegExpected: uint8(0x01), ExpectedOF: uint8(1)},
 	}
 
 	ch := chip8.Chip8{}
@@ -532,6 +536,8 @@ func TestShiftL(t *testing.T) {
 		{Name: "V1_2_OF", Reg: chip8.RegV1, RegVal: uint16(0b11010101), RegExpected: uint8(0xaa), ExpectedOF: uint8(1)},
 		{Name: "V1_3", Reg: chip8.RegV1, RegVal: uint16(0b00000001), RegExpected: uint8(0x2), ExpectedOF: uint8(0)},
 		{Name: "V1_4_OF", Reg: chip8.RegV1, RegVal: uint16(0xF0), RegExpected: uint8(0xE0), ExpectedOF: uint8(1)},
+		{Name: "VF_OF", Reg: chip8.RegVF, RegVal: uint16(0xF0), RegExpected: uint8(0x01), ExpectedOF: uint8(1)},
+		{Name: "VF_NoOF", Reg: chip8.RegVF, RegVal: uint16(0x70), RegExpected: uint8(0x00), ExpectedOF: uint8(0)},
 	}
 
 	ch := chip8.Chip8{}
