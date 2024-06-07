@@ -212,6 +212,23 @@ func (chip *Chip8) SubRegReg(r1, r2 Register) {
 	chip.Reg.PC += 2
 }
 
+func (chip *Chip8) SubNegRegReg(r1, r2 Register) {
+	// carry flag modified if needed
+	result := chip.getRegister(r2) - chip.getRegister(r1)
+	cf := chip.getRegister(r2) >= chip.getRegister(r1)
+
+	chip.setRegister(r1, result)
+
+	if cf {
+		// carry flag is set if there was NO underflow
+		chip.setRegister(RegVF, 0x01)
+	} else {
+		chip.setRegister(RegVF, 0x00)
+	}
+
+	chip.Reg.PC += 2
+}
+
 func (chip *Chip8) Or(r1, r2 Register) {
 	result := chip.getRegister(r1) | chip.getRegister(r2)
 	chip.setRegister(r1, result)
@@ -467,8 +484,8 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 			cmdStr = fmt.Sprintf("SHR V%x, V%x", xr, yr)
 			chip.ShiftR(xr)
 		case 0x07:
-			cmdStr = fmt.Sprintf("SUB V%x, V%x", yr, xr)
-			chip.SubRegReg(yr, xr)
+			cmdStr = fmt.Sprintf("SUBN V%x, V%x", xr, yr)
+			chip.SubNegRegReg(xr, yr)
 		case 0x0E:
 			cmdStr = fmt.Sprintf("SHL V%x, V%x", xr, yr)
 			chip.ShiftL(xr)
