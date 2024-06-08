@@ -17,9 +17,13 @@ const (
 
 //var displayTest = []uint8{0xa2, 0x0a, 0x61, 0x00, 0x62, 0x0a, 0xd1, 0x25, 0x12, 0x08, 0xf0, 0x90, 0xf0, 0x90, 0xf0, 0x00}
 
-var romFile = ".\\bin\\4-flags.ch8"
+//var romFile = ".\\bin\\4-flags.ch8"
 
 //var romFile = ".\\bin\\3-corax+.ch8"
+
+var romFile = ".\\bin\\5-quirks.ch8"
+
+//var romFile = ".\\bin\\6-keypad.ch8"
 
 func main() {
 	e := Engine{}
@@ -50,12 +54,20 @@ func main() {
 	paused := false
 	running := true
 	for running {
+		// clear the current keyboard state
+		//chip.ClearKeyboard()
+
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch event := event.(type) {
 			case *sdl.QuitEvent:
 				println("Quit")
 				running = false
 			case *sdl.KeyboardEvent:
+				if event.Type == sdl.KEYUP {
+					// clear the current keyboard state
+					// but only on key up
+					chip.ClearKeyboard()
+				}
 				if event.Type == sdl.KEYDOWN {
 					switch event.Keysym.Sym {
 					case sdl.K_ESCAPE:
@@ -69,15 +81,57 @@ func main() {
 						//}
 					}
 				}
-				if event.Type == sdl.KEYUP {
+				if event.Type == sdl.KEYDOWN {
 					switch event.Keysym.Sym {
+					case sdl.K_1:
+						chip.Keyboard[0x01] = true
+					case sdl.K_2:
+						chip.Keyboard[0x02] = true
+					case sdl.K_3:
+						chip.Keyboard[0x03] = true
+					case sdl.K_4:
+						chip.Keyboard[0x0C] = true
+					case sdl.K_q:
+						chip.Keyboard[0x04] = true
+					case sdl.K_w:
+						chip.Keyboard[0x05] = true
+					case sdl.K_e:
+						chip.Keyboard[0x06] = true
+					case sdl.K_r:
+						chip.Keyboard[0x0D] = true
+					case sdl.K_a:
+						chip.Keyboard[0x07] = true
+					case sdl.K_s:
+						chip.Keyboard[0x08] = true
+					case sdl.K_d:
+						chip.Keyboard[0x09] = true
+					case sdl.K_f:
+						chip.Keyboard[0x0E] = true
+					case sdl.K_z:
+						chip.Keyboard[0x0A] = true
+					case sdl.K_x:
+						chip.Keyboard[0x00] = true
+					case sdl.K_c:
+						chip.Keyboard[0x0B] = true
+					case sdl.K_v:
+						chip.Keyboard[0x0F] = true
 					}
 				}
 			}
 		}
 
 		if paused {
+			// we still need to make a delay, otherwise huge cpu consumption in PollEvent
+			sdl.Delay(50)
 			continue
+		}
+
+		if chip.Reg.T0 > 0 {
+			chip.Reg.T0--
+		}
+
+		if chip.Reg.T1 > 0 {
+			chip.Reg.T1--
 		}
 
 		cmd := uint16(chip.Memory[int(chip.Reg.PC)])<<8 + uint16(chip.Memory[int(chip.Reg.PC+1)])
@@ -85,19 +139,23 @@ func main() {
 
 		for y := 0; y < chip8.DISPLAY_HEIGHT; y++ {
 			for x := 0; x < chip8.DISPLAY_WIDTH; x++ {
+				rect := sdl.Rect{X: int32(x * 10), Y: int32(y * 10), W: 10, H: 10}
 				if chip.DisplayBuffer[x+y*chip8.DISPLAY_WIDTH] {
-					rect := sdl.Rect{X: int32(x * 10), Y: int32(y * 10), W: 10, H: 10}
 					e.Renderer.SetDrawColor(0, 200, 0, 255)
 					e.Renderer.FillRect(&rect)
 					e.Renderer.SetDrawColor(200, 0, 0, 255)
 					e.Renderer.DrawRect(&rect)
 
+				} else {
+					// we should clear the "pixel" otherwise, or it won't be re-drawn never ever
+					e.Renderer.SetDrawColor(0, 0, 0, 255)
+					e.Renderer.FillRect(&rect)
 				}
 			}
 		}
 
 		e.Renderer.Present()
 
-		sdl.Delay(100)
+		sdl.Delay(2)
 	}
 }

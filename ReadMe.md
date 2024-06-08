@@ -51,7 +51,7 @@ Based on 4-flags test:
 | [x]  | [x]/[ ] | 8X04 | ADD VX, VY   | AddRegReg(VX, VY)          | Set VX = VX + VY (VF mod) |
 | [x]  | [x]/[ ] | 8X05 | SUB VX, VY   | SubRegReg(VX, VY)          | Set VX = VX - VY (VF mod)|
 | [x]  | [x]/[ ] | 8X06 | RSH VX       | ShiftR(VX)                 | Set VX = VX>>1 (VF mod) |
-| [x]  | [x]/[ ] | 8X07 | SUB VX, VY   | SubRegReg(VY, VX)          | Set VX = VY - VX (VF mod) |
+| [x]  | [x]/[ ] | 8X07 | SUBN VX, VY  | SubNegRegReg(VX, VY)       | Set VX = VY - VX (VF mod) |
 | [x]  | [x]/[ ] | 8X0E | LSH VX       | ShiftL(VX)                 | Set VX = VX<<1 (VF mod) |
 | [x]  | [x]/[ ] | AMMM | MOV I, 0MMM  | MovRegVal(I, MMM)          | Set I = 0MMM |
 | [x]  | [ ]/[ ] | FX07 | MOV VX, T0   | MovRegVal(VX, T0)          | Set VX = T0 current timer value |

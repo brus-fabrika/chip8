@@ -144,11 +144,13 @@ func (chip *Chip8) DisplayAt(xr, yr Register, h int) {
 				break
 			}
 			if v&(1<<(7-i)) != 0 {
-				cv := chip.DisplayBuffer[x+i+(y+k)*DISPLAY_WIDTH]
+				index := x + i + (y+k)*DISPLAY_WIDTH
+				cv := chip.DisplayBuffer[index]
 				if cv {
-					chip.DisplayBuffer[x+i+(y+k)*DISPLAY_WIDTH] = false
+					chip.DisplayBuffer[index] = false
+					chip.Reg.V[0x0F] = 0x01
 				} else {
-					chip.DisplayBuffer[x+i+(y+k)*DISPLAY_WIDTH] = true
+					chip.DisplayBuffer[index] = true
 				}
 			}
 		}
@@ -374,10 +376,25 @@ func (chip *Chip8) SetCharReg(r Register) {
 }
 
 func (chip *Chip8) GetKeyReg(r Register) {
-	chip.Reg.PC += 2
+	anyKeyPressed := false
 
-	if !chip.Keyboard[chip.getRegister(r)] {
-		chip.Reg.PC -= 2
+	for key, pressed := range chip.Keyboard {
+		if pressed {
+			chip.setRegister(r, uint16(key))
+			anyKeyPressed = true
+			break
+		}
+	}
+
+	if anyKeyPressed {
+		chip.Reg.PC += 2
+	}
+}
+
+func (chip *Chip8) ClearKeyboard() {
+	// clear keaboard state
+	for i := 0; i < 16; i++ {
+		chip.Keyboard[i] = false
 	}
 }
 
@@ -389,10 +406,7 @@ func (chip *Chip8) Init() {
 		chip.Memory[i] = 0
 	}
 
-	// clear keaboard state
-	for i := 0; i < 16; i++ {
-		chip.Keyboard[i] = false
-	}
+	chip.ClearKeyboard()
 
 	// clear registers state
 	for i := 0; i < 16; i++ {
@@ -528,8 +542,9 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 			cmdStr = fmt.Sprintf("MOV V%X, T0", cmd&0x0f00>>8)
 			chip.MovRegReg(Register(cmd&0x0f00>>8), RegT0)
 		case 0x0A:
-			// TODO: wait for key pressed
-			cmdStr = "NVO"
+			// wait for key pressed
+			cmdStr = fmt.Sprintf("KEY V%x", cmd&0x0f00>>8)
+			chip.GetKeyReg(Register(cmd & 0x0f00 >> 8))
 		case 0x15:
 			cmdStr = fmt.Sprintf("MOV T0, V%X", cmd&0x0f00>>8)
 			chip.MovRegReg(RegT0, Register(cmd&0x0f00>>8))
