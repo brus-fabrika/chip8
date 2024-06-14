@@ -64,13 +64,28 @@ const (
 	RegPC
 )
 
+type ChipVersion int
+
+const (
+	Chip_8 ChipVersion = iota
+	Super_Chip_Modern
+	XO_Chip
+	Super_Chip_Legacy
+)
+
 type Chip8 struct {
+	Ver           ChipVersion
 	Memory        [MEMORY_SIZE]uint8
 	DisplayBuffer [DISPLAY_WIDTH * DISPLAY_HEIGHT]bool
 	Keyboard      [0x10]bool
 	Reg           RegisterSet
 
 	RomSize uint16 // just for control and debug
+
+	State struct {
+		Running bool
+		Paused  bool
+	}
 }
 
 type RegisterSet struct {
@@ -129,8 +144,8 @@ func (chip *Chip8) ClearScreen() {
 
 func (chip *Chip8) DisplayAt(xr, yr Register, h int) {
 	data := make([]uint8, h)
-	x := int(chip.getRegister(xr))
-	y := int(chip.getRegister(yr))
+	x := int(chip.getRegister(xr)) & (DISPLAY_WIDTH - 1)
+	y := int(chip.getRegister(yr)) & (DISPLAY_HEIGHT - 1)
 
 	for i := 0; i < h; i++ {
 		data[i] = chip.Memory[int(chip.Reg.I)+i]
@@ -234,37 +249,48 @@ func (chip *Chip8) SubNegRegReg(r1, r2 Register) {
 func (chip *Chip8) Or(r1, r2 Register) {
 	result := chip.getRegister(r1) | chip.getRegister(r2)
 	chip.setRegister(r1, result)
+	chip.setRegister(RegVF, 0x00)
 	chip.Reg.PC += 2
 }
 
 func (chip *Chip8) Xor(r1, r2 Register) {
 	result := chip.getRegister(r1) ^ chip.getRegister(r2)
 	chip.setRegister(r1, result)
+	chip.setRegister(RegVF, 0x00)
 	chip.Reg.PC += 2
 }
 
 func (chip *Chip8) And(r1, r2 Register) {
 	result := chip.getRegister(r1) & chip.getRegister(r2)
 	chip.setRegister(r1, result)
+	chip.setRegister(RegVF, 0x00)
 	chip.Reg.PC += 2
 }
 
-func (chip *Chip8) ShiftR(r Register) {
-	cf := uint8(chip.getRegister(r) & 0x01)
+func (chip *Chip8) ShiftR(r1, r2 Register) {
+	if chip.Ver == Chip_8 {
+		chip.setRegister(r1, chip.getRegister(r2))
+	}
 
-	result := chip.getRegister(r) >> 1
-	chip.setRegister(r, result)
+	cf := uint8(chip.getRegister(r1) & 0x01)
+
+	result := chip.getRegister(r1) >> 1
+	chip.setRegister(r1, result)
 
 	chip.Reg.V[0x0F] = cf
 
 	chip.Reg.PC += 2
 }
 
-func (chip *Chip8) ShiftL(r Register) {
-	cf := uint8(chip.getRegister(r) & 0x80 >> 7)
+func (chip *Chip8) ShiftL(r1, r2 Register) {
+	if chip.Ver == Chip_8 {
+		chip.setRegister(r1, chip.getRegister(r2))
+	}
 
-	result := chip.getRegister(r) << 1
-	chip.setRegister(r, result)
+	cf := uint8(chip.getRegister(r1) & 0x80 >> 7)
+
+	result := chip.getRegister(r1) << 1
+	chip.setRegister(r1, result)
 
 	chip.Reg.V[0x0F] = cf
 
@@ -398,7 +424,9 @@ func (chip *Chip8) ClearKeyboard() {
 	}
 }
 
-func (chip *Chip8) Init() {
+func (chip *Chip8) Init(ver ChipVersion) {
+	chip.Ver = ver
+
 	chip.ClearScreen()
 
 	// clear memory
@@ -420,6 +448,9 @@ func (chip *Chip8) Init() {
 	chip.Reg.I = 0
 	chip.Reg.T0 = 0
 	chip.Reg.T1 = 0
+
+	chip.State.Running = true
+	chip.State.Paused = false
 
 }
 
@@ -496,13 +527,13 @@ func (chip *Chip8) ProcessCmd(cmd uint16) {
 			chip.SubRegReg(xr, yr)
 		case 0x06:
 			cmdStr = fmt.Sprintf("SHR V%x, V%x", xr, yr)
-			chip.ShiftR(xr)
+			chip.ShiftR(xr, yr)
 		case 0x07:
 			cmdStr = fmt.Sprintf("SUBN V%x, V%x", xr, yr)
 			chip.SubNegRegReg(xr, yr)
 		case 0x0E:
 			cmdStr = fmt.Sprintf("SHL V%x, V%x", xr, yr)
-			chip.ShiftL(xr)
+			chip.ShiftL(xr, yr)
 		default:
 			cmdStr = "NVO"
 		}

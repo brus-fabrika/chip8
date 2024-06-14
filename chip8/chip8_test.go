@@ -12,7 +12,7 @@ func TestLoadRomFromData(t *testing.T) {
 	displayTest := []uint8{0xa2, 0x0a, 0x61, 0x00, 0x62, 0x0a, 0xd1, 0x25, 0x12, 0x08, 0xf0, 0x90, 0xf0, 0x90, 0xf0, 0x00}
 
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 
 	bytesLoaded, err := ch.LoadRomFromData(displayTest)
 
@@ -51,7 +51,7 @@ func TestInit(t *testing.T) {
 		assert.Equal(t, uint16(bytes), uint16(10))
 	}
 
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 
 	// make sure init sets register to correct initail values
 	assert.Equal(t, chip8.MEMORY_USER, ch.Reg.PC)
@@ -72,7 +72,7 @@ func TestInit(t *testing.T) {
 // TODO: add table test with all the registers and getRegValue
 func TestMoveRegVal(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 
 	expected16 := uint16(0x1234)
 	expected08 := uint8(0x34)
@@ -92,7 +92,7 @@ func TestMoveRegVal(t *testing.T) {
 
 func TestMoveRegReg(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 
 	expected16 := uint16(0x1234)
 	expected08 := uint8(0x34)
@@ -116,7 +116,7 @@ func TestMoveRegReg(t *testing.T) {
 
 func TestJump(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 
 	expected16 := uint16(0x0123)
 
@@ -127,7 +127,7 @@ func TestJump(t *testing.T) {
 
 func TestJumpV(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 
 	expected16 := uint16(0x0123)
 
@@ -139,7 +139,7 @@ func TestJumpV(t *testing.T) {
 
 func TestCall(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 
 	expected16 := uint16(0x0123)
 
@@ -151,7 +151,7 @@ func TestCall(t *testing.T) {
 
 func TestCallRet(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 
 	// emulate we are inside a function call
 	// address of call instruction
@@ -174,7 +174,7 @@ func TestCallRet(t *testing.T) {
 
 func TestSkipEqualVal(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 	ch.Reg.PC = 0x0222 // emulate non start address
 	ch.Reg.V[1] = 0x42
 
@@ -195,7 +195,7 @@ func TestSkipEqualVal(t *testing.T) {
 
 func TestSkipNotEqualVal(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 	ch.Reg.PC = 0x0222 // emulate non start address
 	ch.Reg.V[1] = 0x42
 
@@ -216,7 +216,7 @@ func TestSkipNotEqualVal(t *testing.T) {
 
 func TestSkipEqualReg(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 	ch.Reg.PC = 0x0222 // emulate non start address
 	ch.Reg.V[1] = 0x42
 	ch.Reg.V[10] = 0x42
@@ -238,7 +238,7 @@ func TestSkipEqualReg(t *testing.T) {
 
 func TestSkipNotEqualReg(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 	ch.Reg.PC = 0x0222 // emulate non start address
 	ch.Reg.V[1] = 0x42
 	ch.Reg.V[10] = 0x42
@@ -260,7 +260,7 @@ func TestSkipNotEqualReg(t *testing.T) {
 
 func TestSkipKeyPressedAtReg(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 
 	// init setup
 	ch.Reg.PC = 0x0234
@@ -286,7 +286,7 @@ func TestSkipKeyPressedAtReg(t *testing.T) {
 
 func TestSkipKeyNotPressedAtReg(t *testing.T) {
 	ch := chip8.Chip8{}
-	ch.Init()
+	ch.Init(chip8.Chip_8)
 
 	// init setup
 	ch.Reg.PC = 0x0234
@@ -331,7 +331,7 @@ func TestAddRegVal(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.Name, func(t *testing.T) {
-			ch.Init()
+			ch.Init(chip8.Chip_8)
 
 			expectedPC := uint16(0x0204)
 
@@ -368,7 +368,7 @@ func TestAddRegReg(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.Name, func(t *testing.T) {
-			ch.Init()
+			ch.Init(chip8.Chip_8)
 
 			expectedPC := uint16(0x0206)
 
@@ -407,7 +407,7 @@ func TestSubRegReg(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.Name, func(t *testing.T) {
-			ch.Init()
+			ch.Init(chip8.Chip_8)
 
 			expectedPC := uint16(0x0206)
 
@@ -446,7 +446,7 @@ func TestSubNegRegReg(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.Name, func(t *testing.T) {
-			ch.Init()
+			ch.Init(chip8.Chip_8)
 
 			expectedPC := uint16(0x0206)
 
@@ -481,7 +481,8 @@ func TestOr(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.Name, func(t *testing.T) {
-			ch.Init()
+			ch.Init(chip8.Chip_8)
+			ch.Reg.V[0x0F] = 0xF0 // some random values to check CF register reset
 
 			expectedPC := uint16(0x0206)
 
@@ -490,6 +491,7 @@ func TestOr(t *testing.T) {
 			ch.Or(tc.Reg1, tc.Reg2)
 
 			assert.Equal(t, tc.RegExpected, ch.Reg.V[tc.Reg1])
+			assert.Equal(t, uint8(0x00), ch.Reg.V[0x0F])
 			assert.Equal(t, expectedPC, ch.Reg.PC)
 		})
 	}
@@ -514,8 +516,8 @@ func TestXor(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.Name, func(t *testing.T) {
-			ch.Init()
-
+			ch.Init(chip8.Chip_8)
+			ch.Reg.V[0x0F] = 0xF0 // some random value to check CF register reset
 			expectedPC := uint16(0x0206)
 
 			ch.MovRegVal(tc.Reg1, tc.RegVal1)
@@ -524,6 +526,7 @@ func TestXor(t *testing.T) {
 
 			assert.Equal(t, tc.RegExpected, ch.Reg.V[tc.Reg1])
 			assert.Equal(t, expectedPC, ch.Reg.PC)
+			assert.Equal(t, uint8(0x00), ch.Reg.V[0x0F])
 		})
 	}
 }
@@ -532,30 +535,64 @@ func TestShiftR(t *testing.T) {
 
 	testTable := []struct {
 		Name        string
-		Reg         chip8.Register
+		RegDst      chip8.Register
+		RegSrc      chip8.Register
 		RegVal      uint16
 		RegExpected uint8
 		ExpectedOF  uint8
 	}{
-		{Name: "V1_1", Reg: chip8.RegV1, RegVal: uint16(0b01010101), RegExpected: uint8(0b00101010), ExpectedOF: uint8(1)},
-		{Name: "V1_2", Reg: chip8.RegV1, RegVal: uint16(0b00000001), RegExpected: uint8(0x0), ExpectedOF: uint8(1)},
-		{Name: "V1_3", Reg: chip8.RegV1, RegVal: uint16(0xF0), RegExpected: uint8(0x78), ExpectedOF: uint8(0)},
-		{Name: "VF_NoOF", Reg: chip8.RegVF, RegVal: uint16(0xF0), RegExpected: uint8(0x00), ExpectedOF: uint8(0)},
-		{Name: "VF_OF", Reg: chip8.RegVF, RegVal: uint16(0xF1), RegExpected: uint8(0x01), ExpectedOF: uint8(1)},
+		{Name: "V1_1", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0b01010101), RegExpected: uint8(0b00101010), ExpectedOF: uint8(1)},
+		{Name: "V1_2", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0b00000001), RegExpected: uint8(0x0), ExpectedOF: uint8(1)},
+		{Name: "V1_3", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0xF0), RegExpected: uint8(0x78), ExpectedOF: uint8(0)},
+		{Name: "VF_NoOF", RegDst: chip8.RegVF, RegSrc: chip8.RegV2, RegVal: uint16(0xF0), RegExpected: uint8(0x00), ExpectedOF: uint8(0)},
+		{Name: "VF_OF", RegDst: chip8.RegVF, RegVal: uint16(0xF1), RegExpected: uint8(0x01), ExpectedOF: uint8(1)},
+	}
+
+	testTable_NotChip_8 := []struct {
+		Name        string
+		RegDst      chip8.Register
+		RegSrc      chip8.Register
+		RegVal      uint16
+		RegExpected uint8
+		ExpectedOF  uint8
+	}{
+		{Name: "V1_1", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0b01010101), RegExpected: uint8(0b00101010), ExpectedOF: uint8(1)},
+		{Name: "V1_2", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0b00000001), RegExpected: uint8(0x0), ExpectedOF: uint8(1)},
+		{Name: "V1_3", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0xF0), RegExpected: uint8(0x78), ExpectedOF: uint8(0)},
+		{Name: "VF_NoOF", RegDst: chip8.RegVF, RegSrc: chip8.RegV2, RegVal: uint16(0xF0), RegExpected: uint8(0x00), ExpectedOF: uint8(0)},
+		{Name: "VF_OF", RegDst: chip8.RegVF, RegVal: uint16(0xF1), RegExpected: uint8(0x01), ExpectedOF: uint8(1)},
 	}
 
 	ch := chip8.Chip8{}
 
 	for _, tc := range testTable {
 		t.Run(tc.Name, func(t *testing.T) {
-			ch.Init()
+			ch.Init(chip8.Chip_8)
 
 			expectedPC := uint16(0x0204)
 
-			ch.MovRegVal(tc.Reg, tc.RegVal)
-			ch.ShiftR(tc.Reg)
+			ch.MovRegVal(tc.RegSrc, tc.RegVal)
+			ch.ShiftR(tc.RegDst, tc.RegSrc)
 
-			assert.Equal(t, tc.RegExpected, ch.Reg.V[tc.Reg])
+			assert.Equal(t, tc.RegVal, uint16(ch.Reg.V[tc.RegSrc]))
+			assert.Equal(t, tc.RegExpected, ch.Reg.V[tc.RegDst])
+			assert.Equal(t, tc.ExpectedOF, ch.Reg.V[0x0F])
+			assert.Equal(t, expectedPC, ch.Reg.PC)
+		})
+	}
+
+	for _, tc := range testTable_NotChip_8 {
+		t.Run(tc.Name, func(t *testing.T) {
+			ch.Init(chip8.XO_Chip)
+
+			expectedPC := uint16(0x0206)
+			// Non-Chip8 versions only work on X register (dst in this case)
+			ch.MovRegVal(tc.RegDst, tc.RegVal)
+			ch.MovRegVal(tc.RegSrc, uint16(0xAA)) // some random value to test not changed reg
+			ch.ShiftR(tc.RegDst, tc.RegSrc)
+
+			assert.Equal(t, uint8(0xAA), ch.Reg.V[tc.RegSrc])
+			assert.Equal(t, tc.RegExpected, ch.Reg.V[tc.RegDst])
 			assert.Equal(t, tc.ExpectedOF, ch.Reg.V[0x0F])
 			assert.Equal(t, expectedPC, ch.Reg.PC)
 		})
@@ -566,31 +603,66 @@ func TestShiftL(t *testing.T) {
 
 	testTable := []struct {
 		Name        string
-		Reg         chip8.Register
+		RegDst      chip8.Register
+		RegSrc      chip8.Register
 		RegVal      uint16
 		RegExpected uint8
 		ExpectedOF  uint8
 	}{
-		{Name: "V1_1", Reg: chip8.RegV1, RegVal: uint16(0b01010101), RegExpected: uint8(0b10101010), ExpectedOF: uint8(0)},
-		{Name: "V1_2_OF", Reg: chip8.RegV1, RegVal: uint16(0b11010101), RegExpected: uint8(0xaa), ExpectedOF: uint8(1)},
-		{Name: "V1_3", Reg: chip8.RegV1, RegVal: uint16(0b00000001), RegExpected: uint8(0x2), ExpectedOF: uint8(0)},
-		{Name: "V1_4_OF", Reg: chip8.RegV1, RegVal: uint16(0xF0), RegExpected: uint8(0xE0), ExpectedOF: uint8(1)},
-		{Name: "VF_OF", Reg: chip8.RegVF, RegVal: uint16(0xF0), RegExpected: uint8(0x01), ExpectedOF: uint8(1)},
-		{Name: "VF_NoOF", Reg: chip8.RegVF, RegVal: uint16(0x70), RegExpected: uint8(0x00), ExpectedOF: uint8(0)},
+		{Name: "V1_1", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0b01010101), RegExpected: uint8(0b10101010), ExpectedOF: uint8(0)},
+		{Name: "V1_2_OF", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0b11010101), RegExpected: uint8(0xaa), ExpectedOF: uint8(1)},
+		{Name: "V1_3", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0b00000001), RegExpected: uint8(0x2), ExpectedOF: uint8(0)},
+		{Name: "V1_4_OF", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0xF0), RegExpected: uint8(0xE0), ExpectedOF: uint8(1)},
+		{Name: "VF_OF", RegDst: chip8.RegVF, RegSrc: chip8.RegV2, RegVal: uint16(0xF0), RegExpected: uint8(0x01), ExpectedOF: uint8(1)},
+		{Name: "VF_NoOF", RegDst: chip8.RegVF, RegSrc: chip8.RegV2, RegVal: uint16(0x70), RegExpected: uint8(0x00), ExpectedOF: uint8(0)},
+	}
+
+	testTable_NotChip_8 := []struct {
+		Name        string
+		RegDst      chip8.Register
+		RegSrc      chip8.Register
+		RegVal      uint16
+		RegExpected uint8
+		ExpectedOF  uint8
+	}{
+		{Name: "V1_1", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0b01010101), RegExpected: uint8(0b10101010), ExpectedOF: uint8(0)},
+		{Name: "V1_2_OF", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0b11010101), RegExpected: uint8(0xaa), ExpectedOF: uint8(1)},
+		{Name: "V1_3", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0b00000001), RegExpected: uint8(0x2), ExpectedOF: uint8(0)},
+		{Name: "V1_4_OF", RegDst: chip8.RegV1, RegSrc: chip8.RegV2, RegVal: uint16(0xF0), RegExpected: uint8(0xE0), ExpectedOF: uint8(1)},
+		{Name: "VF_OF", RegDst: chip8.RegVF, RegSrc: chip8.RegV2, RegVal: uint16(0xF0), RegExpected: uint8(0x01), ExpectedOF: uint8(1)},
+		{Name: "VF_NoOF", RegDst: chip8.RegVF, RegSrc: chip8.RegV2, RegVal: uint16(0x70), RegExpected: uint8(0x00), ExpectedOF: uint8(0)},
 	}
 
 	ch := chip8.Chip8{}
 
 	for _, tc := range testTable {
 		t.Run(tc.Name, func(t *testing.T) {
-			ch.Init()
+			ch.Init(chip8.Chip_8)
 
 			expectedPC := uint16(0x0204)
 
-			ch.MovRegVal(tc.Reg, tc.RegVal)
-			ch.ShiftL(tc.Reg)
+			ch.MovRegVal(tc.RegSrc, tc.RegVal)
+			ch.ShiftL(tc.RegDst, tc.RegSrc)
 
-			assert.Equal(t, tc.RegExpected, ch.Reg.V[tc.Reg])
+			assert.Equal(t, tc.RegVal, uint16(ch.Reg.V[tc.RegSrc]))
+			assert.Equal(t, tc.RegExpected, ch.Reg.V[tc.RegDst])
+			assert.Equal(t, tc.ExpectedOF, ch.Reg.V[0x0F])
+			assert.Equal(t, expectedPC, ch.Reg.PC)
+		})
+	}
+
+	for _, tc := range testTable_NotChip_8 {
+		t.Run(tc.Name, func(t *testing.T) {
+			ch.Init(chip8.XO_Chip)
+
+			expectedPC := uint16(0x0206)
+
+			ch.MovRegVal(tc.RegSrc, uint16(0xAA))
+			ch.MovRegVal(tc.RegDst, tc.RegVal)
+			ch.ShiftL(tc.RegDst, tc.RegSrc)
+
+			assert.Equal(t, uint8(0xAA), ch.Reg.V[tc.RegSrc])
+			assert.Equal(t, tc.RegExpected, ch.Reg.V[tc.RegDst])
 			assert.Equal(t, tc.ExpectedOF, ch.Reg.V[0x0F])
 			assert.Equal(t, expectedPC, ch.Reg.PC)
 		})
@@ -622,7 +694,7 @@ func TestBcdReg(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.Name, func(t *testing.T) {
-			ch.Init()
+			ch.Init(chip8.Chip_8)
 
 			expectedPC := uint16(0x0206)
 
@@ -640,7 +712,7 @@ func TestBcdReg(t *testing.T) {
 
 	t.Run("BcdOpCode", func(t *testing.T) {
 		expectedPC := uint16(0x0206)
-		ch.Init()
+		ch.Init(chip8.Chip_8)
 		ch.ProcessCmd(0xA220) // MOV I, 0x0220
 		ch.ProcessCmd(0x61B3) // MOV V1, 0xB3 (179)
 		ch.ProcessCmd(0xF133) // BCD V1
