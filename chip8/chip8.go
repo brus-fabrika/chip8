@@ -143,23 +143,27 @@ func (chip *Chip8) ClearScreen() {
 }
 
 func (chip *Chip8) DisplayAt(xr, yr Register, h int) {
-	data := make([]uint8, h)
 	x := int(chip.getRegister(xr)) & (DISPLAY_WIDTH - 1)
 	y := int(chip.getRegister(yr)) & (DISPLAY_HEIGHT - 1)
 
-	for i := 0; i < h; i++ {
-		data[i] = chip.Memory[int(chip.Reg.I)+i]
-	}
-	for k, v := range data {
-		if y+k >= DISPLAY_HEIGHT {
+	dataOffset := int(chip.Reg.I)
+	data := chip.Memory[dataOffset : dataOffset+h]
+
+	chip.Reg.V[0x0F] = 0x00
+
+	for yOffset, v := range data {
+		if y+yOffset >= DISPLAY_HEIGHT {
 			break
 		}
-		for i := 0; i < 8; i++ {
-			if x+i >= DISPLAY_WIDTH {
+		for xOffset := 0; xOffset < 8; xOffset++ {
+			if x+xOffset >= DISPLAY_WIDTH {
 				break
 			}
-			if v&(1<<(7-i)) != 0 {
-				index := x + i + (y+k)*DISPLAY_WIDTH
+
+			spriteBit := v & (1 << (7 - xOffset))
+
+			if spriteBit != 0 {
+				index := x + xOffset + (y+yOffset)*DISPLAY_WIDTH
 				cv := chip.DisplayBuffer[index]
 				if cv {
 					chip.DisplayBuffer[index] = false

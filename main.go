@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/veandco/go-sdl2/sdl"
 
@@ -9,10 +10,14 @@ import (
 )
 
 const (
-	SCREEN_WIDTH        = 640
-	SCREEN_HEIGHT       = 320
-	FRAMERATE           = 30.0
-	USE_FIXED_FRAMERATE = false
+	SCREEN_WIDTH         = 640
+	SCREEN_HEIGHT        = 320
+	SCREEN_FG_COLOR      = 0x00C800
+	SCREEN_FG_COLOR2     = 0xC80000
+	SCREEN_BG_COLOR      = 0x0
+	USE_FIXED_FRAMERATE  = true
+	FRAMERATE            = 60
+	INSTRUCTIONS_PER_SEC = 500
 )
 
 //var displayTest = []uint8{0xa2, 0x0a, 0x61, 0x00, 0x62, 0x0a, 0xd1, 0x25, 0x12, 0x08, 0xf0, 0x90, 0xf0, 0x90, 0xf0, 0x00}
@@ -56,11 +61,19 @@ func main() {
 	chip.MemoryDump(0x0200, 0x0600)
 	//chip.Execute()
 	//chip.DisplayDump()
+
+	perfFreq := float64(sdl.GetPerformanceFrequency())
+
 	for chip.State.Running {
 		// clear the current keyboard state
 		//chip.ClearKeyboard()
 
 		HandleEvent(&chip)
+
+		if !chip.State.Running {
+			// if running disabled - exit processing cycle
+			break
+		}
 
 		if chip.State.Paused {
 			// we still need to make a delay, otherwise huge cpu consumption in PollEvent
@@ -68,38 +81,68 @@ func main() {
 			continue
 		}
 
-		if chip.Reg.T0 > 0 {
-			chip.Reg.T0--
+		start := sdl.GetPerformanceCounter()
+
+		for i := 0; i < int(INSTRUCTIONS_PER_SEC/FRAMERATE); i++ {
+			cmd := uint16(chip.Memory[int(chip.Reg.PC)])<<8 + uint16(chip.Memory[int(chip.Reg.PC+1)])
+			chip.ProcessCmd(cmd)
 		}
 
-		if chip.Reg.T1 > 0 {
-			chip.Reg.T1--
-		}
+		end := sdl.GetPerformanceCounter()
+		elapsed := float64(end-start) / perfFreq * 1000.0
 
-		cmd := uint16(chip.Memory[int(chip.Reg.PC)])<<8 + uint16(chip.Memory[int(chip.Reg.PC+1)])
-		chip.ProcessCmd(cmd)
-
-		for y := 0; y < chip8.DISPLAY_HEIGHT; y++ {
-			for x := 0; x < chip8.DISPLAY_WIDTH; x++ {
-				rect := sdl.Rect{X: int32(x * 10), Y: int32(y * 10), W: 10, H: 10}
-				if chip.DisplayBuffer[x+y*chip8.DISPLAY_WIDTH] {
-					e.Renderer.SetDrawColor(0, 200, 0, 255)
-					e.Renderer.FillRect(&rect)
-					e.Renderer.SetDrawColor(200, 0, 0, 255)
-					e.Renderer.DrawRect(&rect)
-
-				} else {
-					// we should clear the "pixel" otherwise, or it won't be re-drawn never ever
-					e.Renderer.SetDrawColor(0, 0, 0, 255)
-					e.Renderer.FillRect(&rect)
-				}
+		if USE_FIXED_FRAMERATE {
+			if 1000.0/FRAMERATE > elapsed {
+				sdl.Delay(uint32(math.Floor(1000.0/FRAMERATE - elapsed)))
 			}
 		}
 
-		e.Renderer.Present()
-
-		sdl.Delay(2)
+		UpdateDisplay(&e, &chip)
+		UpdateTimer(&chip)
 	}
+}
+
+func UpdateTimer(chip *chip8.Chip8) {
+	if chip.Reg.T0 > 0 {
+		chip.Reg.T0--
+	}
+
+	if chip.Reg.T1 > 0 {
+		chip.Reg.T1--
+	}
+}
+
+func UpdateDisplay(e *Engine, chip *chip8.Chip8) {
+	var fg_r uint8 = (SCREEN_FG_COLOR & 0xFF0000) >> 16
+	var fg_g uint8 = (SCREEN_FG_COLOR & 0x00FF00) >> 8
+	var fg_b uint8 = (SCREEN_FG_COLOR & 0x0000FF)
+
+	var fg2_r uint8 = (SCREEN_FG_COLOR2 & 0xFF0000) >> 16
+	var fg2_g uint8 = (SCREEN_FG_COLOR2 & 0x00FF00) >> 8
+	var fg2_b uint8 = (SCREEN_FG_COLOR2 & 0x0000FF)
+
+	var bg_r uint8 = (SCREEN_BG_COLOR & 0xFF0000) >> 16
+	var bg_g uint8 = (SCREEN_BG_COLOR & 0x00FF00) >> 8
+	var bg_b uint8 = (SCREEN_BG_COLOR & 0x0000FF)
+
+	for y := 0; y < chip8.DISPLAY_HEIGHT; y++ {
+		for x := 0; x < chip8.DISPLAY_WIDTH; x++ {
+			rect := sdl.Rect{X: int32(x * 10), Y: int32(y * 10), W: 10, H: 10}
+			if chip.DisplayBuffer[x+y*chip8.DISPLAY_WIDTH] {
+				e.Renderer.SetDrawColor(fg_r, fg_g, fg_b, 255)
+				e.Renderer.FillRect(&rect)
+				e.Renderer.SetDrawColor(fg2_r, fg2_g, fg2_b, 255)
+				e.Renderer.DrawRect(&rect)
+
+			} else {
+				// we should clear the "pixel" otherwise, or it won't be re-drawn never ever
+				e.Renderer.SetDrawColor(bg_r, bg_g, bg_b, 255)
+				e.Renderer.FillRect(&rect)
+			}
+		}
+	}
+
+	e.Renderer.Present()
 }
 
 func HandleEvent(chip *chip8.Chip8) {
